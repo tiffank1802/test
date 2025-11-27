@@ -8,8 +8,8 @@ def run_simulation():
     # Parameters
     L = 1.0
     T = 2
-    c = 1.0e2  # Wave speed
-    Ne = 10  # Number of elements
+    c = 1.0 # Wave speed
+    Ne = 50  # Number of elements
     d = 2    # Degree of basis functions
     
     # Mesh
@@ -31,7 +31,7 @@ def run_simulation():
     
     # Time stepping parameters
     h = nodes[1] - nodes[0]
-    dt = 0.9 * h / c  # CFL condition
+    dt = 0.1 * h / c  # CFL condition
     Nt = int(T / dt)
     print(f"dt = {dt}, Nt = {Nt}")
     
