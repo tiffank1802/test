@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Simulation Dynamique - Équation des Ondes</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 0;
+            background: #f5f7fa;
+            color: #333;
+            line-height: 1.6;
+        }
+        
+        .header {
+            background: linear-gradient(135deg, #FF416C 0%, #FF4B2B 100%);
+            color: white;
+            padding: 40px 20px;
+            text-align: center;
+        }
+        
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 40px 20px;
+        }
+        
+        .card {
+            background: white;
+            border-radius: 15px;
+            padding: 30px;
+            margin-bottom: 30px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+        }
+        
+        h1 { margin: 0; font-size: 2.5em; }
+        h2 { color: #FF4B2B; border-bottom: 2px solid #eee; padding-bottom: 10px; margin-top: 0; }
+        h3 { color: #444; margin-top: 25px; }
+        
+        .math-block {
+            background: #f8f9fa;
+            padding: 15px;
+            border-left: 4px solid #FF416C;
+            font-family: 'Courier New', monospace;
+            margin: 15px 0;
+            overflow-x: auto;
+            font-size: 1.1em;
+        }
+        
+        .simulation-container {
+            text-align: center;
+            margin: 30px 0;
+            background: black;
+            padding: 20px;
+            border-radius: 10px;
+        }
+        
+        .simulation-container img {
+            max-width: 100%;
+            border-radius: 4px;
+            box-shadow: 0 0 20px rgba(255, 75, 43, 0.3);
+        }
+        
+        .back-btn {
+            display: inline-block;
+            background: rgba(255,255,255,0.2);
+            color: white;
+            text-decoration: none;
+            padding: 10px 20px;
+            border-radius: 20px;
+            margin-bottom: 20px;
+            transition: background 0.3s;
+        }
+        
+        .back-btn:hover { background: rgba(255,255,255,0.3); }
+        
+        .params-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin-top: 20px;
+        }
+        
+        .param-box {
+            background: #f0f2f5;
+            padding: 15px;
+            border-radius: 8px;
+            text-align: center;
+        }
+        
+        .param-value {
+            font-size: 1.5em;
+            font-weight: bold;
+            color: #FF4B2B;
+        }
+        
+        .param-label {
+            font-size: 0.9em;
+            color: #666;
+        }
+    </style>
+    <!-- MathJax -->
+    <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+</head>
+<body>
+
+<div class="header">
+    <div class="container" style="padding: 0;">
+        <a href="index.html" class="back-btn">← Retour à l'accueil</a>
+        <h1>Simulation Dynamique</h1>
+        <p>Propagation d'ondes 1D par Éléments Finis</p>
+    </div>
+</div>
+
+<div class="container">
+
+    <!-- 1. La Simulation -->
+    <div class="card">
+        <h2>Visualisation de l'Onde</h2>
+        <p>Voici le résultat de la simulation d'une barre élastique 1D soumise à une perturbation initiale de type Gaussienne. Les extrémités sont fixées (Conditions de Dirichlet homogènes).</p>
+        
+        <div class="simulation-container">
+            <img src="bar_simulation.gif" alt="Simulation Onde 1D">
+        </div>
+        
+        <div class="params-grid">
+            <div class="param-box">
+                <div class="param-value">50</div>
+                <div class="param-label">Éléments (Quadratiques)</div>
+            </div>
+            <div class="param-box">
+                <div class="param-value">2000</div>
+                <div class="param-label">Pas de temps</div>
+            </div>
+            <div class="param-box">
+                <div class="param-value">1.0</div>
+                <div class="param-label">Vitesse d'onde (c)</div>
+            </div>
+            <div class="param-box">
+                <div class="param-value">0.1</div>
+                <div class="param-label">CFL (Stabilité)</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 2. Modèle Mathématique -->
+    <div class="card">
+        <h2>Modèle Mathématique</h2>
+        <p>Nous résolvons l'équation des ondes 1D (équation hyperbolique) :</p>
+        
+        <div class="math-block">
+            $$ \frac{\partial^2 u}{\partial t^2} = c^2 \frac{\partial^2 u}{\partial x^2} $$
+        </div>
+        
+        <h3>Discrétisation Spatiale (FEM)</h3>
+        <p>On utilise la méthode des éléments finis avec des fonctions de base de Lagrange quadratiques (\(P_2\)). Cela conduit au système semi-discret :</p>
+        <div class="math-block">
+            $$ M \ddot{U} + K U = 0 $$
+        </div>
+        <p>Où \(M\) est la matrice de masse et \(K\) la matrice de rigidité.</p>
+
+        <h3>Discrétisation Temporelle</h3>
+        <p>On utilise un schéma de différences finies centré (explicite) pour la dérivée seconde en temps :</p>
+        <div class="math-block">
+            $$ \ddot{U}^n \approx \frac{U^{n+1} - 2U^n + U^{n-1}}{\Delta t^2} $$
+        </div>
+        <p>Ce qui donne le schéma de mise à jour :</p>
+        <div class="math-block">
+            $$ M U^{n+1} = 2M U^n - M U^{n-1} - \Delta t^2 K U^n $$
+        </div>
+    </div>
+
+    <!-- 3. Code Python -->
+    <div class="card">
+        <h2>Implémentation Python</h2>
+        <p>Le code utilise notre bibliothèque FEM maison <code>fe_appprox1D.py</code> pour l'assemblage des matrices.</p>
+        <pre style="background: #2d2d2d; color: #ccc; padding: 15px; border-radius: 5px; overflow-x: auto;"><code># Assemblage des matrices
+K, _ = assemble(nodes, elements, phi, None, symbolic=False, matrix_function=element_stiffness_matrix)
+M, _ = assemble(nodes, elements, phi, None, symbolic=False, matrix_function=element_matrix)
+
+# Boucle temporelle
+for n in range(Nt):
+    # Calcul du second membre (RHS)
+    b = 2 * M @ u - M @ u_prev - dt**2 * (c**2) * (K @ u)
+    
+    # Résolution du système linéaire M * u_next = b
+    # (Note: Avec mass lumping, M serait diagonale -> inversion triviale)
+    u_next[free_dofs] = np.linalg.solve(M_free, b[free_dofs])</code></pre>
+    </div>
+
+</div>
+
+</body>
+</html>
