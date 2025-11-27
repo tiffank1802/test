@@ -1,0 +1,254 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Théorie de l'Approximation - FEniCS</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 0;
+            background: #f5f7fa;
+            color: #333;
+            line-height: 1.6;
+        }
+        
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 40px 20px;
+            text-align: center;
+        }
+        
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 40px 20px;
+        }
+        
+        .card {
+            background: white;
+            border-radius: 15px;
+            padding: 30px;
+            margin-bottom: 30px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+        }
+        
+        h1 { margin: 0; font-size: 2.5em; }
+        h2 { color: #5b4bc4; border-bottom: 2px solid #eee; padding-bottom: 10px; margin-top: 0; }
+        h3 { color: #444; margin-top: 25px; }
+        
+        .math-block {
+            background: #f8f9fa;
+            padding: 15px;
+            border-left: 4px solid #667eea;
+            font-family: 'Courier New', monospace;
+            margin: 15px 0;
+            overflow-x: auto;
+        }
+        
+        .comparison-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+        }
+        
+        .comparison-table th, .comparison-table td {
+            padding: 12px;
+            border: 1px solid #ddd;
+            text-align: left;
+        }
+        
+        .comparison-table th {
+            background-color: #f0f4f8;
+            color: #5b4bc4;
+        }
+        
+        .img-container {
+            text-align: center;
+            margin: 30px 0;
+        }
+        
+        .img-container img {
+            max-width: 100%;
+            border-radius: 8px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+        }
+        
+        .caption {
+            font-style: italic;
+            color: #666;
+            margin-top: 10px;
+            font-size: 0.9em;
+        }
+        
+        .back-btn {
+            display: inline-block;
+            background: rgba(255,255,255,0.2);
+            color: white;
+            text-decoration: none;
+            padding: 10px 20px;
+            border-radius: 20px;
+            margin-bottom: 20px;
+            transition: background 0.3s;
+        }
+        
+        .back-btn:hover { background: rgba(255,255,255,0.3); }
+        
+        .highlight {
+            background-color: #e3f2fd;
+            padding: 2px 5px;
+            border-radius: 3px;
+            color: #0d47a1;
+        }
+        
+        .warning-box {
+            background-color: #fff3cd;
+            border-left: 4px solid #ffc107;
+            padding: 15px;
+            margin: 20px 0;
+        }
+    </style>
+    <!-- MathJax pour les formules mathématiques -->
+    <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+</head>
+<body>
+
+<div class="header">
+    <div class="container" style="padding: 0;">
+        <a href="index.html" class="back-btn">← Retour à l'accueil</a>
+        <h1>Théorie de l'Approximation</h1>
+        <p>Comprendre les bases mathématiques des Éléments Finis</p>
+    </div>
+</div>
+
+<div class="container">
+
+    <!-- 1. Introduction -->
+    <div class="card">
+        <h2>1. Introduction à l'Interpolation</h2>
+        <p>Dans la méthode des éléments finis, nous cherchons à approximer une fonction complexe \( u(x) \) par une combinaison de fonctions simples (polynômes). Le choix de ces polynômes est crucial pour la précision de la simulation.</p>
+        
+        <div class="img-container">
+            <img src="interpolation_comparison.png" alt="Comparaison Interpolation">
+            <div class="caption">Comparaison visuelle : Lagrange passe par les points, Hermite respecte aussi les tangentes.</div>
+        </div>
+    </div>
+
+    <!-- 2. Polynômes de Colocation -->
+    <div class="card">
+        <h2>2. Polynômes de Colocation</h2>
+        <p>C'est l'approche la plus intuitive pour une <strong>modélisation simpliste</strong>.</p>
+        
+        <h3>Principe</h3>
+        <p>On cherche un polynôme \( P(x) \) qui passe exactement par un ensemble de points donnés \((x_i, y_i)\).</p>
+        <div class="math-block">
+            $$ P(x_i) = y_i \quad \text{pour } i = 0, \dots, n $$
+        </div>
+        
+        <h3>Intérêts et Limites</h3>
+        <ul>
+            <li>✅ <strong>Simplicité</strong> : Facile à comprendre conceptuellement.</li>
+            <li>❌ <strong>Instabilité</strong> : Résoudre le système linéaire \( V \cdot a = y \) (avec la matrice de Vandermonde) est numériquement très instable pour \( n \) grand.</li>
+            <li>❌ <strong>Coût</strong> : Difficile à calculer pour des degrés élevés.</li>
+        </ul>
+    </div>
+
+    <!-- 3. Polynômes de Lagrange -->
+    <div class="card">
+        <h2>3. Polynômes de Lagrange</h2>
+        <p>Les polynômes de Lagrange sont une forme plus élégante et <strong>plus précise</strong> pour construire l'interpolation. Ils sont la base des éléments finis classiques.</p>
+        
+        <h3>Définition</h3>
+        <p>On construit une base de polynômes \( L_i(x) \) telle que :</p>
+        <div class="math-block">
+            $$ L_i(x_j) = \delta_{ij} = \begin{cases} 1 & \text{si } i=j \\ 0 & \text{si } i \neq j \end{cases} $$
+        </div>
+        <p>Le polynôme d'interpolation s'écrit alors simplement :</p>
+        <div class="math-block">
+            $$ P(x) = \sum_{i=0}^n y_i L_i(x) $$
+        </div>
+
+        <div class="img-container">
+            <img src="lagrange_basis.png" alt="Base de Lagrange">
+            <div class="caption">Polynômes de base de Lagrange quadratiques (n=2). Notez comment chaque fonction vaut 1 à son nœud et 0 aux autres.</div>
+        </div>
+
+        <h3>Pourquoi Lagrange est meilleur ?</h3>
+        <ul>
+            <li>✅ <strong>Localisation</strong> : Chaque coefficient \( y_i \) correspond directement à la valeur de la fonction au nœud \( i \).</li>
+            <li>✅ <strong>Stabilité</strong> : Bien mieux conditionné que la base monomiale \((1, x, x^2...)\).</li>
+            <li>✅ <strong>Éléments Finis</strong> : Permet d'assurer la continuité \( C^0 \) entre les éléments facilement.</li>
+        </ul>
+
+        <div class="warning-box">
+            <strong>⚠️ Limites de Lagrange (Phénomène de Runge)</strong><br>
+            Bien que précis, augmenter le degré des polynômes de Lagrange sur des points équidistants peut provoquer des oscillations violentes aux bords de l'intervalle. C'est pourquoi en FEM, on préfère utiliser <strong>beaucoup d'éléments de bas degré</strong> plutôt qu'un seul élément de très haut degré.
+            <div class="img-container">
+                <img src="runge_phenomenon.png" alt="Phénomène de Runge">
+            </div>
+        </div>
+    </div>
+
+    <!-- 4. Polynômes d'Hermite -->
+    <div class="card">
+        <h2>4. Polynômes d'Hermite</h2>
+        <p>Pour approximer <strong>au mieux</strong> une fonction, il ne suffit pas de passer par les points, il faut aussi respecter la "direction" de la courbe.</p>
+        
+        <h3>Principe</h3>
+        <p>L'interpolation d'Hermite impose des conditions sur la valeur de la fonction ET sur ses <strong>dérivées d'ordre supérieur</strong>.</p>
+        <div class="math-block">
+            $$ P(x_i) = y_i \quad \text{ET} \quad P'(x_i) = y'_i $$
+        </div>
+
+        <h3>Intérêts Majeurs</h3>
+        <ul>
+            <li>✅ <strong>Précision Supérieure</strong> : Capture la courbure de la fonction, pas seulement sa position.</li>
+            <li>✅ <strong>Continuité \( C^1 \)</strong> : Essentiel pour certains problèmes physiques (ex: poutres, plaques) où la dérivée (pente) doit être continue entre les éléments.</li>
+            <li>✅ <strong>Réduction de l'erreur</strong> : L'erreur d'approximation diminue plus vite qu'avec Lagrange.</li>
+        </ul>
+        
+        <p>Cependant, ils sont plus complexes à implémenter car ils nécessitent plus de degrés de liberté par nœud (valeur + dérivée).</p>
+    </div>
+
+    <!-- Résumé -->
+    <div class="card">
+        <h2>Résumé Comparatif</h2>
+        <table class="comparison-table">
+            <thead>
+                <tr>
+                    <th>Type</th>
+                    <th>Contraintes</th>
+                    <th>Continuité FEM</th>
+                    <th>Usage Typique</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td><strong>Colocation</strong></td>
+                    <td>Valeurs aux points</td>
+                    <td>Difficile</td>
+                    <td>Modélisation simpliste, introduction</td>
+                </tr>
+                <tr>
+                    <td><strong>Lagrange</strong></td>
+                    <td>Valeurs aux points (Base orthogonale)</td>
+                    <td>\( C^0 \) (Continue)</td>
+                    <td><strong>Standard FEM</strong> (Thermique, Fluides, Élasticité)</td>
+                </tr>
+                <tr>
+                    <td><strong>Hermite</strong></td>
+                    <td>Valeurs + <strong>Dérivées</strong></td>
+                    <td>\( C^1 \) (Lisse)</td>
+                    <td>Poutres (Euler-Bernoulli), Plaques, Coques</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+</div>
+
+</body>
+</html>
